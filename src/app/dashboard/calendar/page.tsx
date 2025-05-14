@@ -26,7 +26,7 @@ export default function CalendarPage() {
   }, [fetchMeetingsData]);
 
   const handleLoginWithGoogle = async () => {
-    const { success, url } = await attemptSyncCalendar();
+    const { url } = await attemptSyncCalendar();
     if (url) {
       console.log(url);
     }

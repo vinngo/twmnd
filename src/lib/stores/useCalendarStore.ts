@@ -1,3 +1,5 @@
+/*
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CalendarEvent } from "../types/calendar";
@@ -8,6 +10,7 @@ interface CalendarEventData {
   error: string | null;
   fetchCalendarData: () => Promise<void>;
 }
+
 
 export const useCalendarStore = create<CalendarEventData>()(
   persist(
@@ -22,3 +25,4 @@ export const useCalendarStore = create<CalendarEventData>()(
     { name: "calendar_events" },
   ),
 );
+*/

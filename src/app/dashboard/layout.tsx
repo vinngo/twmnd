@@ -27,6 +27,10 @@ export default function DashboardLayout({
     }
   }, [pathname]);
 
+  useEffect(() => {
+    setActiveTab(activeTab);
+  }, [activeTab]);
+
   const { user, fetchMeetingsData } = useMeetingsStore();
   useEffect(() => {
     fetchMeetingsData();

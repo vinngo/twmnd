@@ -35,9 +35,9 @@ export default function NotesPage() {
         </CardHeader>
         <CardContent>
           <p className="text-gray-500 italic">
-            Click 'Edit Notes' to add your own notes or provide instructions to
-            regenerate summary (e.g. correct spellings to fix transcription
-            errors)
+            Click &aposEdit Notes&apos to add your own notes or provide
+            instructions to regenerate summary (e.g. correct spellings to fix
+            transcription errors)
           </p>
         </CardContent>
       </Card>
