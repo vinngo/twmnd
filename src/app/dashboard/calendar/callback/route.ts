@@ -16,8 +16,6 @@ export async function GET(request: Request) {
       data: { session },
     } = await supabase.auth.getSession();
 
-    console.log("session:", session);
-
     if (session?.provider_token && session?.user) {
       const { error: updateError } = await supabase
         .from("users")
