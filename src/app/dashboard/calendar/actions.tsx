@@ -1,15 +1,15 @@
 "use server";
-
 import { createClient } from "@/lib/supabase/server";
 
-export async function loginWithGoogle() {
+export async function attemptSyncCalendar() {
   const supabase = await createClient();
 
   try {
     const { data } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000/auth/callback",
+        scopes: "https://www.googleapis.com/auth/calendar.readonly",
+        redirectTo: "http://localhost:3000/dashboard/calendar/callback",
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -18,11 +18,12 @@ export async function loginWithGoogle() {
     });
 
     if (!data.url) {
-      throw new Error("Couldn't get Google login URL");
+      throw new Error("Could not get URL for Google Calendar login");
     }
+
     return { success: true, url: data.url, error: null };
   } catch (e) {
-    console.error("Could not sign in with Google!", e);
-    return { succes: false, error: e };
+    console.error("Could not login to sync Google Calendar!", e);
+    return { success: false, error: e };
   }
 }

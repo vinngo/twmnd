@@ -2,6 +2,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  calendar_connected: boolean;
+  google_access_token: string;
+  google_refresh_token: string;
 }
 
 export interface Meeting {

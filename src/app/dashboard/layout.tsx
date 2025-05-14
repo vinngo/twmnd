@@ -15,15 +15,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState('memories');
+  const [activeTab, setActiveTab] = useState("memories");
 
   useEffect(() => {
-    if (pathname.includes('/calendar')) {
-      setActiveTab('calendar');
-    } else if (pathname.includes('/questions')) {
-      setActiveTab('questions');
+    if (pathname.includes("/calendar")) {
+      setActiveTab("calendar");
+    } else if (pathname.includes("/questions")) {
+      setActiveTab("questions");
     } else {
-      setActiveTab('memories');
+      setActiveTab("memories");
     }
   }, [pathname]);
 
@@ -54,16 +54,30 @@ export default function DashboardLayout({
       {/* Tabs */}
       <div className="bg-white border-b">
         <div className="max-w-5xl mx-auto">
-          <Tabs defaultValue={pathname.includes('/calendar') ? 'calendar' : pathname.includes('/questions') ? 'questions' : 'memories'}>
+          <Tabs
+            defaultValue={
+              pathname.includes("/calendar")
+                ? "calendar"
+                : pathname.includes("/questions")
+                  ? "questions"
+                  : "memories"
+            }
+          >
             <TabsList className="grid w-full grid-cols-3">
               <Link href="/dashboard/memories" className="w-full">
-                <TabsTrigger value="memories" className="w-full">Memories</TabsTrigger>
+                <TabsTrigger value="memories" className="w-full">
+                  Memories
+                </TabsTrigger>
               </Link>
               <Link href="/dashboard/calendar" className="w-full">
-                <TabsTrigger value="calendar" className="w-full">Calendar</TabsTrigger>
+                <TabsTrigger value="calendar" className="w-full">
+                  Calendar
+                </TabsTrigger>
               </Link>
               <Link href="/dashboard/questions" className="w-full">
-                <TabsTrigger value="questions" className="w-full">Questions</TabsTrigger>
+                <TabsTrigger value="questions" className="w-full">
+                  Questions
+                </TabsTrigger>
               </Link>
             </TabsList>
           </Tabs>
@@ -72,6 +86,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       {children}
+
       {/* Footer */}
       <footer className="bg-white border-t py-3 px-4 sticky bottom-0">
         <div className="flex justify-between max-w-5xl mx-auto">
