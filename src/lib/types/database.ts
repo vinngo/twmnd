@@ -9,6 +9,8 @@ export interface Meeting {
   user_id: string;
   start_time: Date;
   end_time: Date;
+  date: Date;
+  title: string;
 }
 
 export interface Transcript {
