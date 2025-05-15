@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon } from "@/app/page";
+import { GoogleIcon } from "@/components/google-icon";
 import { attemptSyncCalendar } from "./actions";
 
 export default function CalendarPage() {
