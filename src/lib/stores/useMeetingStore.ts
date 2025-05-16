@@ -48,8 +48,6 @@ export const useMeetingsStore = create<MeetingsData>()(
             throw new Error("Failed to fetch meetings!");
           }
 
-          console.log("fetched", meetingsData);
-
           set({
             user: appUser,
             meetings: meetingsData,

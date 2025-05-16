@@ -5,115 +5,126 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
+import { useMeetingsStore } from "@/lib/stores/useMeetingStore";
+import { useParams } from "next/navigation";
+import AudioRecorderController from "@/components/AudioRecorderController";
+import { useRecordingStore } from "@/lib/stores/useRecordingStore";
 
 export default function MeetingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { meetings } = useMeetingsStore();
+  const { recordingDuration } = useRecordingStore();
   const pathname = usePathname();
+  const { id } = useParams();
 
-  // Mock meeting data - in a real app, this would come from a database
-  const meeting = {
-    title: "Weekly Team Sync",
-    date: "May 14, 2025",
-    time: "1:05 PM",
-    location: "Santa Cruz, CA",
-  };
+  const meeting = meetings?.filter((meeting) => meeting.id === id)[0];
+
+  const formatTime = (seconds: number) =>
+    `${Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
-        <div className="flex items-center justify-between max-w-6xl mx-auto w-full">
-          <div className="flex items-center">
-            <Link href="/dashboard/memories">
-              <Button variant="ghost" size="icon" className="mr-2">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-bold">Back</h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-              00:01
+    <>
+      <AudioRecorderController />
+      <div className="flex flex-col min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
+          <div className="flex items-center justify-between max-w-6xl mx-auto w-full">
+            <div className="flex items-center">
+              <Link href="/dashboard/memories">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <h1 className="text-xl font-bold">Back</h1>
             </div>
-            <Button variant="ghost" size="icon">
-              <Share2 className="h-5 w-5" />
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                {formatTime(recordingDuration) || "0:00"}
+              </div>
+              <Button variant="ghost" size="icon">
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Meeting Title and Info */}
+        <div className="bg-white px-4 py-4 border-b">
+          <div className="max-w-6xl mx-auto w-full">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {meeting?.title}
+            </h2>
+            <p className="text-gray-500 mt-1">
+              {meeting?.date.toLocaleString()}
+            </p>
           </div>
         </div>
-      </header>
 
-      {/* Meeting Title and Info */}
-      <div className="bg-white px-4 py-4 border-b">
-        <div className="max-w-6xl mx-auto w-full">
-          <h2 className="text-2xl font-bold text-gray-800">{meeting.title}</h2>
-          <p className="text-gray-500 mt-1">
-            {meeting.date} • {meeting.time} • {meeting.location}
-          </p>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="bg-white px-4 py-2 border-b">
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="flex space-x-2">
-            <Link href="/meetings/questions">
-              <Button
-                variant="ghost"
-                className={`rounded-full ${pathname === "/meetings/questions" ? "bg-gray-200" : ""}`}
-              >
-                Questions
-              </Button>
-              <Link href="/meetings/notes">
+        {/* Tab Navigation */}
+        <div className="bg-white px-4 py-2 border-b">
+          <div className="max-w-6xl mx-auto w-full">
+            <div className="flex space-x-2">
+              <Link href={`/meetings/questions/${id}`}>
                 <Button
                   variant="ghost"
-                  className={`rounded-full ${pathname === "/meetings/notes" ? "bg-gray-200" : ""}`}
+                  className={`rounded-full ${pathname.includes("/meetings/questions") ? "bg-gray-200" : ""}`}
+                >
+                  Questions
+                </Button>
+              </Link>
+              <Link href={`/meetings/notes/${id}`}>
+                <Button
+                  variant="ghost"
+                  className={`rounded-full ${pathname.includes("/meetings/notes") ? "bg-gray-200" : ""}`}
                 >
                   Notes
                 </Button>
               </Link>
-              <Link href="/meetings/transcript">
+              <Link href={`/meetings/transcript/${id}`}>
                 <Button
                   variant="ghost"
-                  className={`rounded-full ${pathname === "/meetings/transcript" ? "bg-gray-200" : ""}`}
+                  className={`rounded-full ${pathname.includes("/meetings/transcript") ? "bg-gray-200" : ""}`}
                 >
                   Transcript
                 </Button>
               </Link>
-            </Link>
+            </div>
           </div>
         </div>
+
+        {/* Main Content */}
+        <main className="flex-1 px-4 py-6">
+          <div className="max-w-6xl mx-auto w-full">{children}</div>
+        </main>
+
+        {/* Footer Actions */}
+        <footer className="bg-white border-t py-4 px-4 sticky bottom-0">
+          <div className="max-w-6xl mx-auto w-full flex justify-between">
+            <Button variant="outline" size="lg" className="flex-1 mr-2">
+              Edit Notes
+            </Button>
+            <Button size="lg" className="flex-1 ml-2">
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </div>
+          <div className="max-w-6xl mx-auto w-full mt-3">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full bg-blue-50 text-blue-700 border-blue-200"
+            >
+              Chat with Transcript
+            </Button>
+          </div>
+        </footer>
       </div>
-
-      {/* Main Content */}
-      <main className="flex-1 px-4 py-6">
-        <div className="max-w-6xl mx-auto w-full">{children}</div>
-      </main>
-
-      {/* Footer Actions */}
-      <footer className="bg-white border-t py-4 px-4 sticky bottom-0">
-        <div className="max-w-6xl mx-auto w-full flex justify-between">
-          <Button variant="outline" size="lg" className="flex-1 mr-2">
-            Edit Notes
-          </Button>
-          <Button size="lg" className="flex-1 ml-2">
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-        </div>
-        <div className="max-w-6xl mx-auto w-full mt-3">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full bg-blue-50 text-blue-700 border-blue-200"
-          >
-            Chat with Transcript
-          </Button>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

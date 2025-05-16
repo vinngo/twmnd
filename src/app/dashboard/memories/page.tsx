@@ -20,12 +20,6 @@ export default function MemoriesPage() {
     fetchMeetingsData();
   }, [fetchMeetingsData]);
 
-  useEffect(() => {
-    if (meetings) {
-      console.log(meetings);
-    }
-  }, [meetings]);
-
   const isToday = (dateInput: Date | string) => {
     const date = new Date(dateInput);
     const today = new Date();
@@ -87,7 +81,7 @@ export default function MemoriesPage() {
           <Input placeholder="Search memories..." className="pl-9" />
         </div>
 
-        <Link href="/meetings/new">
+        <Link href="/meetings/questions">
           <Button className="flex items-center gap-2">
             <MicSquare className="h-4 w-4" />
             <span>Capture</span>
@@ -138,10 +132,7 @@ export default function MemoriesPage() {
               </h2>
               <div className="space-y-2">
                 {groupMeetings.map((meeting) => (
-                  <Link
-                    href={`/meetings/notes/${meeting.id}`}
-                    key={meeting.id}
-                  >
+                  <Link href={`/meetings/notes/${meeting.id}`} key={meeting.id}>
                     <Card className="hover:shadow-md transition-shadow">
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
@@ -150,8 +141,8 @@ export default function MemoriesPage() {
                             <div className="flex items-center text-sm text-muted-foreground mt-1">
                               <Clock className="h-3.5 w-3.5 mr-1" />
                               <span>
-                                {new Date(meeting.start_time).getHours() %
-                                  12 || 12}
+                                {new Date(meeting.start_time).getHours() % 12 ||
+                                  12}
                                 :
                                 {new Date(meeting.start_time)
                                   .getMinutes()
@@ -188,7 +179,7 @@ export default function MemoriesPage() {
             <p className="text-gray-500 mb-4">
               Your captured meetings will appear here
             </p>
-            <Link href="/meetings/new">
+            <Link href={`/meetings/questions/new`}>
               <Button>
                 <MicSquare className="h-4 w-4 mr-2" />
                 Capture a meeting
