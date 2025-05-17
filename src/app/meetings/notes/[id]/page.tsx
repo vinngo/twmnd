@@ -1,8 +1,12 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { useNotesStore } from "@/lib/stores/useNotesStore";
 
 export default function NotesPage() {
+  const { note } = useNotesStore();
   return (
     <div className="space-y-6">
       {/* Summary Section */}
@@ -20,7 +24,7 @@ export default function NotesPage() {
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">
-            Transcript is too short to generate a summary
+            {note?.summary || "Start recording to see a summary here!"}
           </p>
         </CardContent>
       </Card>

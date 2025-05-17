@@ -4,13 +4,14 @@ import type React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useMeetingsStore } from "@/lib/stores/useMeetingStore";
 import { useTranscriptStore } from "@/lib/stores/useTranscriptStore";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import AudioRecorderController from "@/components/AudioRecorderController";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
+import { useNotesStore } from "@/lib/stores/useNotesStore";
 
 export default function MeetingsLayout({
   children,
@@ -18,7 +19,8 @@ export default function MeetingsLayout({
   children: React.ReactNode;
 }) {
   const { meetings } = useMeetingsStore();
-  const { transcripts, fetchTranscriptData } = useTranscriptStore();
+  const { fetchTranscriptData } = useTranscriptStore();
+  const { note, fetchNotesData } = useNotesStore();
   const { recordingDuration } = useRecordingStore();
   const pathname = usePathname();
   const { id } = useParams();
@@ -27,11 +29,16 @@ export default function MeetingsLayout({
 
   useEffect(() => {
     fetchTranscriptData(meeting?.id);
-  });
+  }, [fetchTranscriptData, meeting?.id]);
 
   useEffect(() => {
-    console.log(transcripts);
-  }, [transcripts]);
+    fetchNotesData(meeting?.id);
+  }, [fetchNotesData, meeting?.id]);
+
+  useEffect(() => {
+    console.log(meeting?.id);
+    console.log(note);
+  }, [meeting?.id, note]);
 
   const formatTime = (seconds: number) =>
     `${Math.floor(seconds / 60)
@@ -58,9 +65,6 @@ export default function MeetingsLayout({
               <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                 {formatTime(recordingDuration) || "0:00"}
               </div>
-              <Button variant="ghost" size="icon">
-                <Share2 className="h-5 w-5" />
-              </Button>
             </div>
           </div>
         </header>
@@ -69,7 +73,7 @@ export default function MeetingsLayout({
         <div className="bg-white px-4 py-4 border-b">
           <div className="max-w-6xl mx-auto w-full">
             <h2 className="text-2xl font-bold text-gray-800">
-              {meeting?.title}
+              {note?.title || meeting?.title}
             </h2>
             <p className="text-gray-500 mt-1">
               {meeting?.date.toLocaleString()}
@@ -119,10 +123,6 @@ export default function MeetingsLayout({
           <div className="max-w-6xl mx-auto w-full flex justify-between">
             <Button variant="outline" size="lg" className="flex-1 mr-2">
               Edit Notes
-            </Button>
-            <Button size="lg" className="flex-1 ml-2">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
             </Button>
           </div>
           <div className="max-w-6xl mx-auto w-full mt-3">

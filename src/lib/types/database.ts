@@ -30,3 +30,12 @@ export interface ChatLog {
   ai_reseponse: string;
   timestamp: Date;
 }
+
+export interface Note {
+  id: string;
+  meeting_id: string;
+  summary: string;
+  notes: string;
+  title: string;
+  created_at: Date;
+}
