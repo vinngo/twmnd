@@ -33,8 +33,43 @@ export async function saveBlob(
     if (error) {
       throw Error(error.message);
     }
+
+    //insert a pending transcript
+
+    const { error: pendingTranscriptError } = await supabase
+      .from("pending_transcripts")
+      .insert({
+        meeting_id,
+        chunk_index,
+        storage_path: `${user.id}/${meeting_id}/${timestamp}-chunk-${chunk_index}.webm`,
+        status: "pending",
+      });
+
+    if (pendingTranscriptError) {
+      throw Error(pendingTranscriptError.message);
+    }
   } catch (e) {
     console.error("could not save blob to audio", e);
+    return { succes: false, error: e };
+  }
+}
+
+export async function invokeProcessing() {
+  const supabase = createClient();
+
+  try {
+    const { error } = await supabase.functions.invoke(
+      "process-pending-transcripts",
+      {
+        body: { name: "Functions" },
+      },
+    );
+
+    if (error) {
+      throw new Error(error);
+    }
+  } catch (e) {
+    console.error("could not invoke processing", e);
     return { succes: false, error: e };
   }
 }

@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
 import { useMeetingsStore } from "@/lib/stores/useMeetingStore";
+import { useTranscriptStore } from "@/lib/stores/useTranscriptStore";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import AudioRecorderController from "@/components/AudioRecorderController";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
 
@@ -16,11 +18,20 @@ export default function MeetingsLayout({
   children: React.ReactNode;
 }) {
   const { meetings } = useMeetingsStore();
+  const { transcripts, fetchTranscriptData } = useTranscriptStore();
   const { recordingDuration } = useRecordingStore();
   const pathname = usePathname();
   const { id } = useParams();
 
   const meeting = meetings?.filter((meeting) => meeting.id === id)[0];
+
+  useEffect(() => {
+    fetchTranscriptData(meeting?.id);
+  });
+
+  useEffect(() => {
+    console.log(transcripts);
+  }, [transcripts]);
 
   const formatTime = (seconds: number) =>
     `${Math.floor(seconds / 60)

@@ -20,6 +20,7 @@ export interface Transcript {
   id: string;
   meeting_id: string;
   text: string;
+  timestamp: string;
 }
 
 export interface ChatLog {

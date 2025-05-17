@@ -9,7 +9,7 @@ interface TranscriptData {
   transcripts: Transcript[] | null;
   loading: boolean;
   error: string | null;
-  fetchTranscriptData: () => Promise<void>;
+  fetchTranscriptData: (meeting_id: string | undefined) => Promise<void>;
 }
 
 export const useTranscriptStore = create<TranscriptData>()(
@@ -18,23 +18,19 @@ export const useTranscriptStore = create<TranscriptData>()(
       transcripts: null,
       loading: true,
       error: null,
-      async fetchTranscriptData() {
+      async fetchTranscriptData(meeting_id: string | undefined) {
+        if (!meeting_id) {
+          set({ loading: false, error: "Meeting ID is required!" });
+          return;
+        }
+
         const supabase = createClient();
         try {
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser();
-
-          if (!user || userError) {
-            throw new Error("User not authenticated");
-          }
-
           const { data: transcriptsData, error: transcriptsError } =
             await supabase
               .from("transcripts")
               .select("*")
-              .eq("user_id", user.id);
+              .eq("meeting_id", meeting_id);
 
           if (transcriptsError) {
             throw new Error("Failed to fetch transcripts!");

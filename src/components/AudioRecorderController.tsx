@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
-import { saveBlob } from "@/lib/services/recordingService";
+import { invokeProcessing, saveBlob } from "@/lib/services/recordingService";
 
 export default function AudioRecorderController() {
   const {
@@ -87,17 +87,25 @@ export default function AudioRecorderController() {
       const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
 
       recorder.ondataavailable = async (event) => {
+        if (
+          !mediaRecorderRef.current ||
+          mediaRecorderRef.current.state !== "recording"
+        ) {
+          return;
+        }
+
+        // 2) If there’s actually data, process it
         if (event.data.size > 0) {
           const blob = new Blob([event.data], { type: "audio/webm" });
           console.log(`⏺️ Chunk ${chunkIndex} recorded`, blob.size, "bytes");
 
-          // TODO: Upload logic goes here
-          // await uploadAudioChunk(meetingId, blob, chunkIndex)
           if (meeting_id) {
             console.log("saving blob");
             await saveBlob(meeting_id, blob, chunkIndex);
           }
 
+          console.log("processing transcripts");
+          await invokeProcessing();
           setChunkIndex((prev) => prev + 1);
         }
       };
