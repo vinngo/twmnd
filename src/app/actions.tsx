@@ -10,6 +10,7 @@ export async function loginWithGoogle() {
       provider: "google",
       options: {
         redirectTo: "http://localhost:3000/auth/callback",
+        scopes: "https://www.googleapis.com/auth/calendar.readonly",
         queryParams: {
           access_type: "offline",
           prompt: "consent",

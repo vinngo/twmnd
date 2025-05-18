@@ -1,7 +1,6 @@
-/*
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import axios from "axios";
 import { CalendarEvent } from "../types/calendar";
 
 interface CalendarEventData {
@@ -11,7 +10,6 @@ interface CalendarEventData {
   fetchCalendarData: () => Promise<void>;
 }
 
-
 export const useCalendarStore = create<CalendarEventData>()(
   persist(
     (set) => ({
@@ -19,10 +17,21 @@ export const useCalendarStore = create<CalendarEventData>()(
       loading: true,
       error: null,
       async fetchCalendarData() {
-        set();
+        try {
+          const res = await axios.get("/api/calendar/events");
+          set({
+            events: res.data.events,
+            loading: false,
+          });
+        } catch (error: any) {
+          set({
+            events: null,
+            loading: false,
+            error: error.message,
+          });
+        }
       },
     }),
     { name: "calendar_events" },
   ),
 );
-*/

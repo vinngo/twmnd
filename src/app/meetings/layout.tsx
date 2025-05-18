@@ -32,6 +32,7 @@ export default function MeetingsLayout({
   }, [fetchTranscriptData, meeting?.id]);
 
   useEffect(() => {
+    console.log("fetched from:", meeting?.id);
     fetchNotesData(meeting?.id);
   }, [fetchNotesData, meeting?.id]);
 
