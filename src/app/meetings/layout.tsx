@@ -8,10 +8,11 @@ import { ArrowLeft } from "lucide-react";
 import { useMeetingsStore } from "@/lib/stores/useMeetingStore";
 import { useTranscriptStore } from "@/lib/stores/useTranscriptStore";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AudioRecorderController from "@/components/AudioRecorderController";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
 import { useNotesStore } from "@/lib/stores/useNotesStore";
+import { ChatModal } from "@/components/chat-modal";
 
 export default function MeetingsLayout({
   children,
@@ -24,6 +25,7 @@ export default function MeetingsLayout({
   const { recordingDuration } = useRecordingStore();
   const pathname = usePathname();
   const { id } = useParams();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const meeting = meetings?.filter((meeting) => meeting.id === id)[0];
 
@@ -131,11 +133,16 @@ export default function MeetingsLayout({
               variant="outline"
               size="lg"
               className="w-full bg-blue-50 text-blue-700 border-blue-200"
+              onClick={() => setModalOpen(true)}
             >
               Chat with Transcript
             </Button>
           </div>
         </footer>
+        <ChatModal
+          isOpen={modalOpen}
+          onCloseAction={() => setModalOpen(false)}
+        />
       </div>
     </>
   );

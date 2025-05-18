@@ -39,3 +39,11 @@ export interface Note {
   title: string;
   created_at: Date;
 }
+
+export interface Question {
+  id: string;
+  meeting_id: string;
+  user_input: string;
+  ai_response: string;
+  timestamp: Date;
+}
