@@ -9,7 +9,9 @@ export async function attemptSyncCalendar() {
       provider: "google",
       options: {
         scopes: "https://www.googleapis.com/auth/calendar.readonly",
-        redirectTo: "http://localhost:3000/dashboard/calendar/callback",
+        redirectTo: process.env.PROD
+          ? "https://twmnd.vercel.app/dashboard/calendar/callback"
+          : "http://localhost:3000/dashboard/calendar/callback",
         queryParams: {
           access_type: "offline",
           prompt: "consent",
