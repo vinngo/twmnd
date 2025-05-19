@@ -1,27 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
+export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const client = new OpenAI();
 
   try {
-    const user_input = req.body.input;
-    const transcript = req.body.transcript;
-    const meeting_id = req.body.meeting_id;
+    const body = await req.json();
+    const user_input = body.input;
+    const transcript = body.transcript;
+    const meeting_id = body.meeting_id;
 
     if (!meeting_id || !user_input || !transcript) {
-      return res
-        .status(400)
-        .json({ error: "Meeting ID, input, and transcript are required" });
+      return NextResponse.json(
+        { error: "Meeting ID, input, and transcript are required" },
+        { status: 400 },
+      );
     }
 
     const response = await client.responses.create({
@@ -43,11 +38,14 @@ export default async function handler(
         .single();
 
     if (insertQuestionError) {
-      return res.status(500).json({ error: insertQuestionError.message });
+      return NextResponse.json(
+        { error: insertQuestionError.message },
+        { status: 500 },
+      );
     }
 
-    res.status(200).json({ question: insertedQuestion });
+    return NextResponse.json({ question: insertedQuestion }, { status: 200 });
   } catch (e: any) {
-    return res.status(500).json({ error: e.message });
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
