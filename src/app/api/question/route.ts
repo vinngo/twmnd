@@ -4,7 +4,7 @@ import OpenAI from "openai";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const client = new OpenAI();
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   try {
     const body = await req.json();

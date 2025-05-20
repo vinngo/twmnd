@@ -4,15 +4,22 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import { Question as Message } from "@/lib/types/database";
+import { Transcript } from "@/lib/types/database";
 
-type Message = {
-  role: "user" | "assistant";
+class Question {
+  role: string;
   content: string;
-};
+
+  constructor(role: string, content: string) {
+    this.role = role;
+    this.content = content;
+  }
+}
 
 type QuickPrompt = {
   text: string;
@@ -23,22 +30,41 @@ interface ChatModalProps {
   isOpen: boolean;
   onCloseAction: () => void;
   meetingId?: string;
-  meetingTitle?: string;
+  transcript?: Transcript[] | null;
+  prevMessages?: Message[] | undefined;
   initialPrompts?: QuickPrompt[];
 }
 
 export function ChatModal({
   isOpen,
   onCloseAction,
-  meetingId = "",
+  meetingId,
+  transcript,
+  prevMessages,
   initialPrompts,
 }: ChatModalProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Question[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showInitialView, setShowInitialView] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (prevMessages && prevMessages.length > 0) {
+      const messageToQuestion = [];
+      for (const message of prevMessages) {
+        messageToQuestion.push(new Question("user", message.user_input));
+        messageToQuestion.push(new Question("assistant", message.ai_response));
+      }
+      setMessages(messageToQuestion);
+      setShowInitialView(false);
+    }
+  }, [prevMessages]);
+
+  useEffect(() => {
+    console.log(transcript);
+  });
 
   // Default quick prompts if none provided
   const defaultPrompts: QuickPrompt[] = [
@@ -90,11 +116,24 @@ export function ChatModal({
     setIsLoading(true);
     setShowInitialView(false);
 
+    //convert transcript to text
+
+    let transcriptText = "";
+    if (transcript && transcript.length > 0) {
+      for (const transcriptItem of transcript) {
+        transcriptText += transcriptItem.text;
+      }
+    }
+
+    console.log(message);
+    console.log(meetingId);
+    console.log(transcriptText);
+
     try {
-      const res = await axios.post("/api/ask", {
+      const res = await axios.post("/api/question", {
         input: message,
         meeting_id: meetingId,
-        transcript: messages.map((m) => m.content).join("\n"), // Simple way to build context
+        transcript: transcriptText,
       });
 
       const ai_response = res.data?.question?.ai_response;
@@ -139,11 +178,11 @@ export function ChatModal({
         {/* Header */}
         <div className="p-4 flex items-center">
           {!showInitialView && messages.length > 0 && (
-            <h2 className="text-xl font-semibold">
+            <DialogTitle className="text-xl font-semibold">
               {messages[0].content.length > 50
                 ? `${messages[0].content.substring(0, 50)}...`
                 : messages[0].content}
-            </h2>
+            </DialogTitle>
           )}
         </div>
 

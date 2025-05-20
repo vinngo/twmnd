@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import AudioRecorderController from "@/components/AudioRecorderController";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
 import { useNotesStore } from "@/lib/stores/useNotesStore";
+import { useQuestionStore } from "@/lib/stores/useQuestionStore";
 import { ChatModal } from "@/components/chat-modal";
 
 export default function MeetingsLayout({
@@ -20,9 +21,10 @@ export default function MeetingsLayout({
   children: React.ReactNode;
 }) {
   const { meetings } = useMeetingsStore();
-  const { fetchTranscriptData } = useTranscriptStore();
+  const { transcripts, fetchTranscriptData } = useTranscriptStore();
   const { note, fetchNotesData } = useNotesStore();
   const { recordingDuration } = useRecordingStore();
+  const { questions, fetchQuestionData } = useQuestionStore();
   const pathname = usePathname();
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,6 +34,10 @@ export default function MeetingsLayout({
   useEffect(() => {
     fetchTranscriptData(meeting?.id);
   }, [fetchTranscriptData, meeting?.id]);
+
+  useEffect(() => {
+    fetchQuestionData(meeting?.id);
+  }, [fetchQuestionData, meeting?.id]);
 
   useEffect(() => {
     console.log("fetched from:", meeting?.id);
@@ -141,7 +147,10 @@ export default function MeetingsLayout({
         </footer>
         <ChatModal
           isOpen={modalOpen}
+          meetingId={meeting?.id}
           onCloseAction={() => setModalOpen(false)}
+          prevMessages={questions}
+          transcript={transcripts}
         />
       </div>
     </>
