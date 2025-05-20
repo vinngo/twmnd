@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { OpenAI } from "openai";
+import { NextRequest } from "next/server";
+
+export const runtime = "edge"; // enable edge runtime
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -13,39 +15,70 @@ export async function POST(req: NextRequest) {
     const meeting_id = body.meeting_id;
 
     if (!meeting_id || !user_input || !transcript) {
-      return NextResponse.json(
-        { error: "Meeting ID, input, and transcript are required" },
-        { status: 400 },
+      return new Response(
+        JSON.stringify({
+          error: "Meeting ID, input, and transcript are required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
-    const response = await client.responses.create({
-      model: "gpt-4o-mini",
-      input: `Answer questions from the user: ${user_input}, given the context: ${transcript}`,
+    const stream = await client.chat.completions.create({
+      model: "gpt-4o",
+      stream: true,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a helpful assistant answering questions based on a meeting transcript.",
+        },
+        {
+          role: "user",
+          content: `Answer this user query: "${user_input}"\n\nBased on this context:\n${transcript}`,
+        },
+      ],
     });
 
-    const ai_output = response.output_text;
+    const encoder = new TextEncoder();
+    let fullResponse = "";
 
-    const { data: insertedQuestion, error: insertQuestionError } =
-      await supabase
-        .from("questions")
-        .insert({
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          const content = chunk.choices?.[0]?.delta?.content || "";
+          fullResponse += content;
+          controller.enqueue(encoder.encode(content));
+        }
+
+        // Insert into Supabase once full response is complete
+        const { error } = await supabase.from("questions").insert({
           meeting_id,
           user_input,
-          ai_response: ai_output,
-        })
-        .select()
-        .single();
+          ai_response: fullResponse,
+        });
 
-    if (insertQuestionError) {
-      return NextResponse.json(
-        { error: insertQuestionError.message },
-        { status: 500 },
-      );
-    }
+        if (error) {
+          console.error("Supabase insert error:", error.message);
+        }
 
-    return NextResponse.json({ question: insertedQuestion }, { status: 200 });
+        controller.close();
+      },
+    });
+
+    return new Response(readableStream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Transfer-Encoding": "chunked",
+      },
+    });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

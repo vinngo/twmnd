@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import axios from "axios";
 import { Question as Message } from "@/lib/types/database";
 import { Transcript } from "@/lib/types/database";
 
@@ -62,6 +61,12 @@ export function ChatModal({
     }
   }, [prevMessages]);
 
+  const handleQuickPrompt = (prompt: string) => {
+    setInput(prompt);
+    setShowInitialView(false);
+    handleSendMessage(prompt);
+  };
+
   // Default quick prompts if none provided
   const defaultPrompts: QuickPrompt[] = [
     {
@@ -96,12 +101,6 @@ export function ChatModal({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleQuickPrompt = (prompt: string) => {
-    setInput(prompt);
-    setShowInitialView(false);
-    handleSendMessage(prompt);
-  };
-
   const handleSendMessage = async (
     messageText?: string,
     followup?: boolean,
@@ -109,19 +108,18 @@ export function ChatModal({
     const message = messageText || input;
     if (!message.trim()) return;
 
-    // Add user message to state
+    // Clear messages if it's a followup reset
     if (followup) {
-      setMessages([]);
-      setMessages((prev) => [...prev, { role: "user", content: message }]);
+      setMessages([{ role: "user", content: message }]);
     } else {
       setMessages((prev) => [...prev, { role: "user", content: message }]);
     }
+
     setInput("");
     setIsLoading(true);
     setShowInitialView(false);
 
-    //convert transcript to text
-
+    // Convert transcript to plain text
     let transcriptText = "";
     if (transcript && transcript.length > 0) {
       for (const transcriptItem of transcript) {
@@ -130,24 +128,49 @@ export function ChatModal({
     }
 
     try {
-      const res = await axios.post("/api/question", {
-        input: message,
-        meeting_id: meetingId,
-        transcript: transcriptText,
+      const res = await fetch("/api/question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: message,
+          meeting_id: meetingId,
+          transcript: transcriptText,
+        }),
       });
 
-      const ai_response = res.data?.question?.ai_response;
+      if (!res.body) throw new Error("No response body");
 
-      if (!ai_response) {
-        throw new Error("No response from assistant.");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let accumulated = "";
+
+      // Push empty assistant message to start streaming into
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulated += chunk;
+
+        // Update the latest assistant message with streamed text
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.role === "assistant") {
+            updated[updated.length - 1] = {
+              ...last,
+              content: accumulated,
+            };
+          }
+          return updated;
+        });
       }
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: ai_response },
-      ]);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Streaming error:", error);
       setMessages((prev) => [
         ...prev,
         {
