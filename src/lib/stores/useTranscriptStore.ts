@@ -19,31 +19,59 @@ export const useTranscriptStore = create<TranscriptData>()(
       loading: true,
       error: null,
       async fetchTranscriptData(meeting_id: string | undefined) {
-        if (!meeting_id) {
-          set({ loading: false, error: "Meeting ID is required!" });
-          return;
-        }
+        if (meeting_id) {
+          const supabase = createClient();
+          try {
+            const { data: transcriptsData, error: transcriptsError } =
+              await supabase
+                .from("transcripts")
+                .select("*")
+                .eq("meeting_id", meeting_id);
 
-        const supabase = createClient();
-        try {
-          const { data: transcriptsData, error: transcriptsError } =
-            await supabase
-              .from("transcripts")
-              .select("*")
-              .eq("meeting_id", meeting_id);
+            if (transcriptsError) {
+              throw new Error("Failed to fetch transcripts!");
+            }
 
-          if (transcriptsError) {
-            throw new Error("Failed to fetch transcripts!");
+            set({
+              transcripts: transcriptsData,
+              loading: false,
+              error: null,
+            });
+          } catch (e) {
+            const message = e instanceof Error ? e.message : "Unknown error";
+            set({ loading: false, error: message });
           }
+        } else {
+          const supabase = createClient();
+          try {
+            const {
+              data: { user },
+              error,
+            } = await supabase.auth.getUser();
 
-          set({
-            transcripts: transcriptsData,
-            loading: false,
-            error: null,
-          });
-        } catch (e) {
-          const message = e instanceof Error ? e.message : "Unknown error";
-          set({ loading: false, error: message });
+            if (!user || error) {
+              throw new Error("Failed to fetch user!");
+            }
+
+            const { data: transcriptData, error: transcriptError } =
+              await supabase
+                .from("transcripts")
+                .select("*")
+                .eq("user_id", user.id);
+
+            if (transcriptError) {
+              throw new Error("Failed to fetch transcripts!");
+            }
+
+            set({
+              transcripts: transcriptData,
+              loading: false,
+              error: null,
+            });
+          } catch (e) {
+            const message = e instanceof Error ? e.message : "Unknown error";
+            set({ loading: false, error: message });
+          }
         }
       },
     }),

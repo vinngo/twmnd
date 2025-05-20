@@ -39,6 +39,7 @@ export async function saveBlob(
     const { error: pendingTranscriptError } = await supabase
       .from("pending_transcripts")
       .insert({
+        user_id: user.id,
         meeting_id,
         chunk_index,
         storage_path: `${user.id}/${meeting_id}/${timestamp}-chunk-${chunk_index}.webm`,

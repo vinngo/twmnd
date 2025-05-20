@@ -41,7 +41,7 @@ export default function QuestionsPage() {
             onClick={() => handleCardClick(question)}
           >
             <CardContent className="p-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <h3 className="font-medium">{"❓" + question.user_input}</h3>
                 </div>
