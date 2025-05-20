@@ -24,7 +24,7 @@ export default function MeetingsLayout({
   const { transcripts, fetchTranscriptData } = useTranscriptStore();
   const { note, fetchNotesData } = useNotesStore();
   const { recordingDuration } = useRecordingStore();
-  const { questions, fetchQuestionData } = useQuestionStore();
+  const { fetchQuestionData } = useQuestionStore();
   const pathname = usePathname();
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -149,7 +149,6 @@ export default function MeetingsLayout({
           isOpen={modalOpen}
           meetingId={meeting?.id}
           onCloseAction={() => setModalOpen(false)}
-          prevMessages={questions}
           transcript={transcripts}
         />
       </div>

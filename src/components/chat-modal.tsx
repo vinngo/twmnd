@@ -62,10 +62,6 @@ export function ChatModal({
     }
   }, [prevMessages]);
 
-  useEffect(() => {
-    console.log(transcript);
-  });
-
   // Default quick prompts if none provided
   const defaultPrompts: QuickPrompt[] = [
     {
@@ -106,12 +102,20 @@ export function ChatModal({
     handleSendMessage(prompt);
   };
 
-  const handleSendMessage = async (messageText?: string) => {
+  const handleSendMessage = async (
+    messageText?: string,
+    followup?: boolean,
+  ) => {
     const message = messageText || input;
     if (!message.trim()) return;
 
     // Add user message to state
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    if (followup) {
+      setMessages([]);
+      setMessages((prev) => [...prev, { role: "user", content: message }]);
+    } else {
+      setMessages((prev) => [...prev, { role: "user", content: message }]);
+    }
     setInput("");
     setIsLoading(true);
     setShowInitialView(false);
@@ -124,10 +128,6 @@ export function ChatModal({
         transcriptText += transcriptItem.text;
       }
     }
-
-    console.log(message);
-    console.log(meetingId);
-    console.log(transcriptText);
 
     try {
       const res = await axios.post("/api/question", {
@@ -160,10 +160,14 @@ export function ChatModal({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent, followup: boolean) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (followup) {
+        handleSendMessage(undefined, followup);
+      } else {
+        handleSendMessage();
+      }
     }
   };
 
@@ -197,7 +201,7 @@ export function ChatModal({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything about this transcript..."
                 className="w-full border-b border-gray-200 py-2 pl-2 pr-10 text-lg focus:outline-none focus:border-blue-500"
-                onKeyDown={handleKeyDown}
+                onKeyDown={(e) => handleKeyDown(e, false)}
               />
               {input && (
                 <Button
@@ -279,12 +283,12 @@ export function ChatModal({
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask follow up..."
                   className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={(e) => handleKeyDown(e, true)}
                 />
                 <Button
                   size="icon"
                   className="rounded-full"
-                  onClick={() => handleSendMessage()}
+                  onClick={() => handleSendMessage(undefined, true)}
                   disabled={!input.trim() || isLoading}
                 >
                   <Send className="h-4 w-4" />

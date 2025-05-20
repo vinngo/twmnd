@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, AlertCircle } from "lucide-react";
 import { useRecordingStore } from "@/lib/stores/useRecordingStore";
 import { useTranscriptStore } from "@/lib/stores/useTranscriptStore";
+import { useQuestionStore } from "@/lib/stores/useQuestionStore";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ChatModal } from "@/components/chat-modal";
+import { Card, CardContent } from "@/components/ui/card";
+import { Question } from "@/lib/types/database";
 
 export default function NewMeetingPage() {
   const {
@@ -16,17 +20,16 @@ export default function NewMeetingPage() {
     clearPermissionError,
   } = useRecordingStore();
   const { transcripts } = useTranscriptStore();
+  const { questions: questionData } = useQuestionStore();
+  const [chatModalOpen, setChatModalOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [questions] = useState<Question[]>(questionData || []);
 
   useEffect(() => {
     if (permissionError) {
       setShowAlert(true);
     }
   }, [permissionError]);
-
-  useEffect(() => {
-    console.log("recording:", isRecording);
-  });
 
   const toggleRecording = async () => {
     if (!isRecording) {
@@ -42,11 +45,30 @@ export default function NewMeetingPage() {
     }
   };
 
+  const renderQuestionCards = () => {
+    return (
+      <div className="space-y-2">
+        {questions.map((question) => (
+          <Card className="hover:shadow-md transition-shadow" key={question.id}>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium"></h3>
+                  <div></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div>
         {Array.isArray(transcripts) && transcripts.length > 0 ? (
-          <div>Questions</div>
+          renderQuestionCards()
         ) : (
           <>
             <h2 className="text-xl font-semibold mb-4">Record Meeting</h2>
@@ -99,6 +121,10 @@ export default function NewMeetingPage() {
           </>
         )}
       </div>
+      <ChatModal
+        isOpen={chatModalOpen}
+        onCloseAction={() => setChatModalOpen(false)}
+      />
     </div>
   );
 }
