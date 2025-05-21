@@ -29,7 +29,7 @@ export const useNotesStore = create<NotesData>((set, get) => ({
       .eq("meeting_id", meeting_id)
       .single();
 
-    if (error) return set({ error: error.message, loading: false });
+    if (error) return set({ note: null, error: error.message, loading: false });
 
     set({ note: data, loading: false });
 

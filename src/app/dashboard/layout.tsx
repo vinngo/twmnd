@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { HelpCircle, LogOut, Settings } from "lucide-react";
+import { HelpCircle, LogOut } from "lucide-react";
 import { useMeetingsStore } from "@/lib/stores/useMeetingStore";
 import { useEffect, useState } from "react";
 
@@ -94,11 +94,6 @@ export default function DashboardLayout({
       {/* Footer */}
       <footer className="bg-white border-t py-3 px-4 sticky bottom-0">
         <div className="flex justify-between max-w-5xl mx-auto">
-          <Button variant="ghost" size="sm" className="text-gray-500">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
-
           <Link href="/">
             <Button variant="ghost" size="sm" className="text-gray-500">
               <LogOut className="h-4 w-4 mr-2" />

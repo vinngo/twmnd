@@ -28,23 +28,6 @@ export default function NotesPage() {
           </p>
         </CardContent>
       </Card>
-
-      {/* Notes Section */}
-      <Card>
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-xl">Your Notes</CardTitle>
-          <Button variant="outline" size="sm">
-            Edit
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500 italic">
-            Click &apos;Edit Notes&apos; to add your own notes or provide
-            instructions to regenerate summary (e.g. correct spellings to fix
-            transcription errors)
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -52,35 +52,45 @@ export default function CalendarPage() {
               <CardHeader>
                 <CardTitle>Calendar</CardTitle>
                 <CardDescription>View your meetings by date</CardDescription>
-
-                {events?.map((event) => {
-                  return (
-                    <Link
-                      href={`/meetings/from-event?eventId=${event.id}&title=${encodeURIComponent(event.summary + " Recording")}`}
-                      key={event.id}
-                    >
-                      <Card className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium">{event.summary}</h3>
-                              <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                <Clock className="h-3.5 w-3.5 mr-1" />
-                                <span>
-                                  {new Date(
-                                    //@ts-expect-error this actually exists on the event object
-                                    event.start.dateTime,
-                                  ).toLocaleString()}
-                                </span>
+                {events && events.length > 0 ? (
+                  events.map((event) => {
+                    return (
+                      <Link
+                        href={`/meetings/from-event?eventId=${event.id}&title=${encodeURIComponent(event.summary + " Recording")}`}
+                        key={event.id}
+                      >
+                        <Card className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h3 className="font-medium">{event.summary}</h3>
+                                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  <span>
+                                    {new Date(
+                                      //@ts-expect-error this actually exists on the event object
+                                      event.start.dateTime,
+                                    ).toLocaleString()}
+                                  </span>
+                                </div>
                               </div>
+                              <MessageSquare className="h-5 w-5 text-gray-400" />
                             </div>
-                            <MessageSquare className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <h3 className="font-medium">No Events</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        You have no meetings scheduled.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
             </>
           ) : (

@@ -22,7 +22,7 @@ export default function MeetingsLayout({
 }) {
   const { meetings } = useMeetingsStore();
   const { transcripts, fetchTranscriptData } = useTranscriptStore();
-  const { note, fetchNotesData } = useNotesStore();
+  const { note, error, fetchNotesData } = useNotesStore();
   const { recordingDuration } = useRecordingStore();
   const { fetchQuestionData } = useQuestionStore();
   const pathname = usePathname();
@@ -42,11 +42,11 @@ export default function MeetingsLayout({
   useEffect(() => {
     console.log("fetched from:", meeting?.id);
     fetchNotesData(meeting?.id);
-  }, [fetchNotesData, meeting?.id]);
+    console.log(error);
+  }, [error, fetchNotesData, meeting?.id]);
 
   useEffect(() => {
     console.log(meeting?.id);
-    console.log(note);
   }, [meeting?.id, note]);
 
   const formatTime = (seconds: number) =>
@@ -129,11 +129,6 @@ export default function MeetingsLayout({
 
         {/* Footer Actions */}
         <footer className="bg-white border-t py-4 px-4 sticky bottom-0">
-          <div className="max-w-6xl mx-auto w-full flex justify-between">
-            <Button variant="outline" size="lg" className="flex-1 mr-2">
-              Edit Notes
-            </Button>
-          </div>
           <div className="max-w-6xl mx-auto w-full mt-3">
             <Button
               variant="outline"

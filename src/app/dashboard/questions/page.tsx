@@ -37,21 +37,27 @@ export default function QuestionsPage() {
         <div>
           <div className="sticky top-24">
             <div className="space-y-2">
-              {questions.map((question) => (
-                <Card
-                  className="hover:shadow-md transition-shadow"
-                  key={question.id}
-                  onClick={() => handleCardClick(question)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">{question.user_input}</h3>
+              {questions && questions.length > 0 ? (
+                questions.map((question) => (
+                  <Card
+                    className="hover:shadow-md transition-shadow"
+                    key={question.id}
+                    onClick={() => handleCardClick(question)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium">{question.user_input}</h3>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center">
+                  <p>No questions asked yet.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
